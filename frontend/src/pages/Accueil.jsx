@@ -1,12 +1,9 @@
 ﻿import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-
-const API = import.meta.env.VITE_API_URL;
 
 export default function Accueil() {
   const [sondages, setSondages] = useState([]);
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
   const navigate = useNavigate();
   const pseudo = localStorage.getItem("pseudo");
 
