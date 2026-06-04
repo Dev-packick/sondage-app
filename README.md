@@ -68,4 +68,3 @@ initiale incomplète ont conduit à une réunion d'équipe le 24/05/2026.
 Cette réunion a abouti à une reprise complète du projet : nouveau repo,
 modèle de données revu, workflow GitHub clarifié et plan de travail
 redistribué à chaque membre selon ses responsabilités.
-## Application en ligne
