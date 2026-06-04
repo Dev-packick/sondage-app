@@ -1,165 +1,70 @@
-#  Sondage App
+# Sondage App
+Application web de sondages collaboratifs - Projet CTF BACH
+## Équipe
 
-Application web fullstack de création et de partage de sondages, avec authentification et vote en temps réel.
-
----
-
-##  Fonctionnalités
-
-- **Inscription / Connexion** — authentification sécurisée par JWT et mots de passe hashés (bcrypt)
-- **Créer un sondage** — titre + options personnalisées, génération d'un lien de partage unique
-- **Voter** — un seul vote par utilisateur et par sondage (contrainte en base de données)
-- **Résultats** — visualisation du décompte des votes par option
-- **Partage** — accès à un sondage via un code UUID partageable sans authentification
-
----
-
+API : Lead / Chef de projet
+Bénie : Reviewer (Qualité du code)
+Patrick : DevOps (Docker, Base de données, Organisation du projet)
+Adrien : Dev Frontend (Interface utilisateur)
+Umair : Dev Backend (API, Logique métier)
 ## Stack technique
+- **Frontend** : React + React Router + Axios
+- **Backend** : Node.js + Express
+- **Base de données** : PostgreSQL
+- **Infrastructure** : Docker + Docker Compose
+- **Déploiement** : Render
 
-| Couche | Technologie |
-|--------|-------------|
-| Frontend | React 19, React Router v7, Axios, Vite |
-| Backend | Node.js, Express 5 |
-| Base de données | PostgreSQL 15 |
-| Auth | JWT + bcryptjs |
-| Conteneurisation | Docker, Docker Compose |
-| Reverse proxy | Nginx |
+## Modèle de données (MPD)
+Utilisateurs (id, pseudo, mot_de_passe, date_inscription) 
+Sondages (id, titre, id_auteur FK, code_partage UNIQUE, date_creation)
+Options (id, id_sondage FK, libelle)
+Votes (id, id_utilisateur FK, id_sondage FK, id_option FK, date_vote)
+UNIQUE (id_utilisateur, id_sondage) - anti-double vote
 
----
-
-## Structure du projet
-
-```
-sondage-app/
-├── backend/
-│   ├── index.js          # API REST Express
-│   ├── package.json
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   └── pages/
-│   │       ├── Accueil.jsx
-│   │       ├── Connexion.jsx
-│   │       ├── Inscription.jsx
-│   │       ├── CreerSondage.jsx
-│   │       └── SondagePage.jsx
-│   ├── nginx.conf
-│   ├── package.json
-│   └── Dockerfile
-├── init.sql              # Schéma de base de données
-└── docker-compose.yml
-```
-
----
-
-## Lancer le projet
-
+## Lancer le projet en local
 ### Prérequis
+- Docker et Docker Compose installés
+- Node.js installé
 
-- [Docker](https://www.docker.com/) et Docker Compose installés
+### Option 1 - Sans Docker (développement)
 
-### Démarrage
-
+Terminal 1 - Base de données uniquement :
 ```bash
-git clone https://github.com/Dev-packick/sondage-app.git
-cd sondage-app
-docker compose up --build
-```
+docker-compose up -d db
 
-L'application sera disponible sur :
-
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost |
-| Backend API | http://localhost:3001 |
-| PostgreSQL | localhost:5432 |
-
-### Arrêt
-
+Terminal 2 - Backend :
 ```bash
-docker compose down
-```
+cd backend
+npm install
+node index.js
 
-Pour supprimer aussi les données persistées :
-
+Terminal 3 - Frontend :
 ```bash
-docker compose down -v
-```
+cd frontend
+npm install
+npm start
 
----
+- Frontend : http://localhost:3000
+- Backend : http://localhost:3001
 
-## API — Endpoints
 
-### Authentification
+### Option 2 - Avec Docker complet
+```bash
+docker-compose up --build
 
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| `POST` | `/api/inscription` | Créer un compte |
-| `POST` | `/api/connexion` | Se connecter, retourne un token JWT |
+- Application : http://localhost
+## Fonctionnalités
+- [x] Inscription et connexion sécurisée (mot de passe chiffré)
+- [x] Créer un sondage avec plusieurs options
+- [x] Voter (une seule fois par sondage - anti-double vote)
+- [x] Voir les résultats
+- [x] Copier le lien de partage d'un sondage
+- [ ] Résultats en temps réel via WebSockets (en cours)
 
-### Sondages
 
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| `GET` | `/api/sondages` |  | Lister tous les sondages |
-| `GET` | `/api/sondages/:id` |  | Détail d'un sondage |
-| `POST` | `/api/sondages` |  | Créer un sondage |
-| `GET` | `/api/sondages/:id/resultats` |  | Résultats d'un sondage |
-| `GET` | `/api/partage/:code` |  | Accéder à un sondage par code de partage |
-
-### Votes
-
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| `POST` | `/api/votes` |  | Voter pour une option |
-
-> Les routes protégées () nécessitent un header `Authorization: Bearer <token>`.
-
----
-
-##  Schéma de base de données
-
-```
-Utilisateurs
-├── id (PK)
-├── pseudo (unique)
-├── mot_de_passe
-└── date_inscription
-
-Sondages
-├── id (PK)
-├── titre
-├── id_auteur (FK → Utilisateurs)
-├── code_partage (unique UUID)
-└── date_creation
-
-Options
-├── id (PK)
-├── id_sondage (FK → Sondages)
-└── libelle
-
-Votes
-├── id (PK)
-├── id_utilisateur (FK → Utilisateurs)
-├── id_sondage (FK → Sondages)
-├── id_option (FK → Options)
-├── date_vote
-└── UNIQUE (id_utilisateur, id_sondage)   ← anti double-vote
-```
-
----
-
-##  Variables d'environnement
-
-Le backend est configuré via Docker Compose. Pour un déploiement personnalisé, créez un fichier `.env` dans `backend/` :
-
-```env
-DATABASE_URL=postgresql://admin:admin123@db:5432/sondageapp
-JWT_SECRET=votre_secret_jwt
-PORT=3001
-```
-
->  Pensez à changer `JWT_SECRET` et le mot de passe PostgreSQL avant tout déploiement en production.
-
----
+## Problèmes rencontrés
+Au démarrage du projet, une mauvaise compréhension des rôles et une structure
+initiale incomplète ont conduit à une réunion d'équipe le 24/05/2026.
+Cette réunion a abouti à une reprise complète du projet : nouveau repo,
+modèle de données revu, workflow GitHub clarifié et plan de travail
+redistribué à chaque membre selon ses responsabilités.
