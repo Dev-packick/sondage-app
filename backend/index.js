@@ -25,7 +25,6 @@ function auth(req, res, next) {
   }
 }
 
-// Test
 app.get('/', (req, res) => res.json({ message: 'sondage-app backend OK' }));
 
 // INSCRIPTION
