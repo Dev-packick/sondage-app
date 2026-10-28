@@ -28,9 +28,12 @@ export default function CreerSondage() {
   };
 
   const handleCreer = async () => {
+    
     const token = localStorage.getItem("token");
     if (!token) return alert("Connecte-toi d'abord");
+    
     if (!titre.trim()) return alert("Ajoute un titre");
+    
     const optionsFiltrees = options.filter((o) => o.trim() !== "");
     if (optionsFiltrees.length < 2) return alert("Minimum 2 options");
     setLoading(true);
